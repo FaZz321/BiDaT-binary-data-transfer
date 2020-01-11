@@ -1,4 +1,6 @@
-BiDaT is a language. It's a binary language for simple data transfer of hierarchical structures.
+BiDaT is a language.
+
+It's a binary language for transfering hierarchical data.
 
 ////////////
 // LEXEMS //
@@ -10,19 +12,17 @@ Non-terminal symbols:
 3. LIST — list of values (keys are integers).
 4. LIST_SIZE — number of values in the list (or pairs of key and value for named list)
 5. LIST_VALUES — sequence of VALUEs in the list
-6. NAMED_LIST — named list (list with strings as keys).
+6. NAMED_LIST — named list (keys are strings).
 7. NAMED_LIST_VALUES — sequence of pairs (VALUE_NAME, VALUE)
 8. VALUE_NAME — name of a value in a named list.
 
 Terminal symbols:
-1. SB = 0x00 — first bytes of any BiDaT record.
-2. LB = 0xFF — last bytes of any BiDaT record.
-3. 00..FF — some bytes
-4. int = 4 bytes, little endian, signed int.
-5. uint = 4 bytes, little endian, unsigned int.
-6. real = 8 bytes, little endian, float (double).
-7. bool = 0x01 or 0x00 — for True and False respectivly.
-8. string = UTF-8 encoded, 0x00 terminated string.
+1. 00..FF — some bytes
+2. int = 4 bytes, little endian, signed int.
+3. uint = 4 bytes, little endian, unsigned int.
+4. real = 8 bytes, little endian, float (double).
+5. bool = 1 byte, 0x01 or 0x00 — for True and False respectivly.
+6. string = UTF-8 encoded, 0x00 terminated string.
 
 ///////////////
 // GRAMMATIC //
