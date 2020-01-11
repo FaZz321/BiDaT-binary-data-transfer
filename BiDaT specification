@@ -1,0 +1,38 @@
+BiDaT is a language. It's a binary language for simple data transfer of hierarchical structures.
+
+////////////
+// LEXEMS //
+////////////
+
+Non-terminal symbols:
+1. RECORD — represents all content in a single BiDaT message.
+2. VALUE — represents single value of certain type.
+3. LIST — list of values (keys are integers).
+4. LIST_SIZE — number of values in the list (or pairs of key and value for named list)
+5. LIST_VALUES — sequence of VALUEs in the list
+6. NAMED_LIST — named list (list with strings as keys).
+7. NAMED_LIST_VALUES — sequence of pairs (VALUE_NAME, VALUE)
+8. VALUE_NAME — name of a value in a named list.
+
+Terminal symbols:
+1. SB = 0x00 — first bytes of any BiDaT record.
+2. LB = 0xFF — last bytes of any BiDaT record.
+3. 00..FF — some bytes
+4. int = 4 bytes, little endian, signed int.
+5. uint = 4 bytes, little endian, unsigned int.
+6. real = 8 bytes, little endian, float (double).
+7. bool = 0x01 or 0x00 — for True and False respectivly.
+8. string = UTF-8 encoded, 0x00 terminated string.
+
+///////////////
+// GRAMMATIC //
+///////////////
+
+1. RECORD ::= 00 Value FF
+2. VALUE ::= 01 int | 02 real | 03 bool | 04 string | 05 LIST | 06 NAMED_LIST
+3. LIST ::= LIST_SIZE LIST_VALUES
+4. LIST_VALUES := VALUE VALUE ... VALUE  // number of values coresponds to LIST_SIZE of this list
+5. NAMED_LIST ::= LIST_SIZE NAMED_LIST_VALUES
+6. NAMED_LIST_VALUE ::= VALUE_NAME VALUE VALUE_NAME VALUE ... VALUE_NAME VALUE  // number of values coresponds to LIST_SIZE of this named list
+7. VALUE_NAME ::= string
+8. LIST_SIZE ::= uint
