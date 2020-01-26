@@ -1,38 +1,64 @@
-BiDaT is a language.
+/////////////
+// О ЯЗЫКЕ //
+/////////////
 
-It's a binary language for transfering hierarchical data.
+BiDaT (Binary Data Transfer) это простой бинарный язык для передачи иерархических данных.
 
-////////////
-// LEXEMS //
-////////////
+//////////////////////////
+// ОСНОВНЫЕ ОСОБЕННОСТИ //
+//////////////////////////
 
-Non-terminal symbols:
-1. RECORD — represents all content in a single BiDaT message.
-2. VALUE — represents single value of certain type.
-3. LIST — list of values (keys are integers).
-4. LIST_SIZE — number of values in the list (or pairs of key and value for named list)
-5. LIST_VALUES — sequence of VALUEs in the list
-6. NAMED_LIST — named list (keys are strings).
-7. NAMED_LIST_VALUES — sequence of pairs (VALUE_NAME, VALUE)
-8. VALUE_NAME — name of a value in a named list.
+1. Простота трансляции языка.
+  Сообщение на языке BiDaT можно транслировать методом рекурсивного спуска.
+2. Нормативность.
+  В языке нет двойственности типов: размеры значений, порядок битов и строковая кодировка строго определены и входят в определение языка.
+3. Поддержка основных типов.
+  Простые значения могут принимать целый, вещественный, строковый, булев тип.
+4. Иерархичность.
+  Язык поддерживает списки и именнованные списки (ассоциативные "массивы" с ключами-строками). Значения в списках могут быть любого типа (в том числе и другим списком / именованным списком).
+5. Ничего лишнего.
+  Язык не пытается стать чем-то большим, чем он является. BiDaT — это бинарный язык для передачи иерархических данных, никаких других задач он выполнять не стемится.
+6. Открытость:
+  MIT лицензия.
 
-Terminal symbols:
-1. 00..FF — some bytes
-2. int = 4 bytes, little endian, signed int.
-3. uint = 4 bytes, little endian, unsigned int.
-4. real = 8 bytes, little endian, float (double).
-5. bool = 1 byte, 0x01 or 0x00 — for True and False respectivly.
-6. string = UTF-8 encoded, 0x00 terminated string.
+/////////////
+// ЛЕКСИКА //
+/////////////
 
-///////////////
-// GRAMMATIC //
-///////////////
+Нетерминальные символы:
+1. RECORD — отражает содеражние одной записи на языке BiDaT.
+2. VALUE — отражает одиночное значение определённого типа.
+3. LIST — список значений (ключи — целые числа).
+4. LARGE_LIST — большой список значеинй (ключи — целые числа).
+5. NAMED_LIST — именованный список (ключи — строки).
+6. LARGE_NAMED_LIST — большой именованный список (ключи — строки).
+7. LIST_SIZE — кол-во значений в списке (или пар ключ-значение для именованных списков)
+8. LARGE_LIST_SIZE — кол-во значений в большом списке (или пар ключ-значение для именованных списков)
+9. VALUE_NAME — имя(ключ) значения в именованном списке.
+10. LIST_VALUES — последовательность значений (VALUE) в списке
+11. NAMED_LIST_VALUES — последовательность пар ключ-значение в именованном списке
 
-1. RECORD ::= 00 Value FF
-2. VALUE ::= 01 int | 02 real | 03 bool | 04 string | 05 LIST | 06 NAMED_LIST
+Терминальные символы:
+1. 00..FF — конкретные байты (0x00..0xFF)
+2. sint = 1 байт, little endian, unsigned char
+3. int = 4 байта, little endian, signed int.
+4. uint = 4 байта, little endian, unsigned int.
+5. real = 8 байтов, little endian, float64 (double).
+6. bool = 1 байт, 0x01 или 0x00 для True или False соответственно.
+7. string = Нуль-терминированная строка (завершается символом 0x00), кодировка UTF-8.
+
+////////////////
+// ГРАММАТИКА //
+////////////////
+
+1. RECORD ::= 00 VALUE FF
+2. VALUE ::= 01 int | 02 real | 03 bool | 04 string | 05 LIST | 15 LARGE_LIST | 06 NAMED_LIST | 16 LARGE_NAMED_LIST
 3. LIST ::= LIST_SIZE LIST_VALUES
-4. LIST_VALUES := VALUE VALUE ... VALUE  // number of values coresponds to LIST_SIZE of this list
-5. NAMED_LIST ::= LIST_SIZE NAMED_LIST_VALUES
-6. NAMED_LIST_VALUE ::= VALUE_NAME VALUE VALUE_NAME VALUE ... VALUE_NAME VALUE  // number of values coresponds to LIST_SIZE of this named list
-7. VALUE_NAME ::= string
-8. LIST_SIZE ::= uint
+4. LARGE_LIST ::= LARGE_LIST_SIZE LIST_VALUES
+5. LIST_VALUES := VALUE VALUE ... VALUE  // кол-во значений равно LIST_SIZE или LARGE_LIST_SIZE этого списка
+6. NAMED_LIST ::= LIST_SIZE NAMED_LIST_VALUES
+7. LARGE_NAMED_LIST ::= LARGE_LIST_SIZE NAMED_LIST_VALUES
+8. NAMED_LIST_VALUES ::= VALUE_NAME VALUE VALUE_NAME VALUE ... VALUE_NAME VALUE  // кол-во пар ключ-значение равно LIST_SIZE или LARGE_LIST_SIZE этого списка
+9. VALUE_NAME ::= string
+10. LIST_SIZE ::= sint
+11. LARGE_LIST_SIZE ::= uint
