@@ -44,15 +44,16 @@ BiDaT (Binary Data Transfer) это простой бинарный язык д�
 3. int = 4 байта, little endian, signed int.
 4. uint = 4 байта, little endian, unsigned int.
 5. real = 8 байтов, little endian, float64 (double).
-6. bool = 1 байт, 0x01 или 0x00 для True или False соответственно.
+6. bool = 1 байт, 0x01 или 0x00 для True или False соответственно
 7. string = Нуль-терминированная строка (завершается символом 0x00), кодировка UTF-8.
+8. binary = Бинарные данные произвольного размера.
 
 ////////////////
 // ГРАММАТИКА //
 ////////////////
 
 1. RECORD ::= 00 VALUE FF
-2. VALUE ::= 01 int | 02 real | 03 bool | 04 string | 05 LIST | 15 LARGE_LIST | 06 NAMED_LIST | 16 LARGE_NAMED_LIST
+2. VALUE ::= 01 int | 02 real | 03 bool | 04 string | 05 LIST | 15 LARGE_LIST | 06 NAMED_LIST | 16 LARGE_NAMED_LIST | 07 BINARY_DATA
 3. LIST ::= LIST_SIZE LIST_VALUES
 4. LARGE_LIST ::= LARGE_LIST_SIZE LIST_VALUES
 5. LIST_VALUES := VALUE VALUE ... VALUE  // кол-во значений равно LIST_SIZE или LARGE_LIST_SIZE этого списка
@@ -62,3 +63,5 @@ BiDaT (Binary Data Transfer) это простой бинарный язык д�
 9. VALUE_NAME ::= string
 10. LIST_SIZE ::= sint
 11. LARGE_LIST_SIZE ::= uint
+12. BINARY_DATA ::= BINARY_SIZE binary  // длинна бинарных данных равна BINARY_SIZE
+13. BINARY_SIZE ::= uint  // Размер бинарных данных в байтах
