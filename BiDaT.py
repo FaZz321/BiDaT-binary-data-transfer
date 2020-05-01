@@ -1,19 +1,41 @@
+################
+# BiDaT parser #
+################
+
+# USAGE:
+#
+#   decoding:
+#     1. Create new instance of BiParser, using byte sequence as an argument
+#     2. use BiParser.parseRecord() to parse byte sequence to BiRecord
+#     3. use BiRecord.getRootValue() to get reference (!) to python-type values contained in BiRecord instance
+#
+#   encoding:
+#     1. Create a new instance of BiRecord using root value (python-type data: int, float, bool, str, list, dict, byte, bytearray) as an argument
+#     2. use BiRecord.encodeRecord() to create BiDaT byte sequence
+#     Note: you can change root value by using BiRecord.changeRootValue() OR you can change it by using reference to root value.
+#
+#   Not threadsafe. (good thing to add in the future)
+
 import struct
 
 class BiParser:
 
-    def __init__(self, byteSeq):
-        self.byteSeq = byteSeq
+    def __init__(self, byte_seq):
+        self.byte_seq = byte_seq
+        self.cursor = 0
+
+    def changeByteSeq(self, new_byte_seq):
+        self.byte_seq = new_byte_seq
         self.cursor = 0
 
     def parseRecord(self):
-        if self.byteSeq[self.cursor] != 0x00:
+        if self.byte_seq[self.cursor] != 0x00:
             raise Exception("[BiParser]: frist bytes not found")
         self.cursor += 1
         
         value = self.parseValue()
         
-        if self.byteSeq[self.cursor] != 0xFF:
+        if self.byte_seq[self.cursor] != 0xFF:
             raise Exception("[BiParser]: last bytes not found")
         self.cursor += 1
         
@@ -21,7 +43,7 @@ class BiParser:
         return result
 
     def parseValue(self):
-        value_type = self.byteSeq[self.cursor]
+        value_type = self.byte_seq[self.cursor]
         self.cursor += 1
 
         value_type
@@ -42,23 +64,27 @@ class BiParser:
             return self.parseNList(large = False)
         elif value_type == 0x16:
             return self.parseNList(large = True)
+        elif value_type == 0x07:
+            return self.parseBinary(large = False)
+        elif value_type == 0x17:
+            return self.parseBinary(large = True)
         else:
             raise Exception("[BiParser]: wrong value type")
 
         return result
 
     def parseInt(self):
-        b = self.byteSeq[self.cursor : self.cursor + 4]
+        b = self.byte_seq[self.cursor : self.cursor + 4]
         self.cursor += 4
         return struct.unpack("<i", b)[0]
 
     def parseReal(self):
-        b = self.byteSeq[self.cursor : self.cursor + 8]
+        b = self.byte_seq[self.cursor : self.cursor + 8]
         self.cursor += 8
         return struct.unpack("<d", b)[0]
 
     def parseBool(self):
-        b = self.byteSeq[self.cursor]
+        b = self.byte_seq[self.cursor]
         self.cursor += 1
         
         if (b == 0x01):
@@ -74,24 +100,24 @@ class BiParser:
         counter = 0
         byte = None
         while True:
-            byte = self.byteSeq[self.cursor]
+            byte = self.byte_seq[self.cursor]
             self.cursor += 1
             if byte != 0:
                 counter += 1
             else:
                 break
 
-        b = self.byteSeq[self.cursor - counter - 1 : self.cursor - 1]
+        b = self.byte_seq[self.cursor - counter - 1 : self.cursor - 1]
         
         return str(b, 'utf-8')
 
     def parseList(self, large):
         if large:
-            size = self.byteSeq[self.cursor : self.cursor+4]
+            size = self.byte_seq[self.cursor : self.cursor+4]
             size = struct.unpack("<I", size)[0]
             self.cursor += 4
         else:
-            size = self.byteSeq[self.cursor : self.cursor+1]
+            size = self.byte_seq[self.cursor : self.cursor+1]
             size = struct.unpack("<B", size)[0]
             self.cursor += 1
 
@@ -103,11 +129,11 @@ class BiParser:
 
     def parseNList(self, large):
         if large:
-            size = self.byteSeq[self.cursor : self.cursor+4]
+            size = self.byte_seq[self.cursor : self.cursor+4]
             size = struct.unpack("<I", size)[0]
             self.cursor += 4
         else:
-            size = self.byteSeq[self.cursor : self.cursor+1]
+            size = self.byte_seq[self.cursor : self.cursor+1]
             size = struct.unpack("<B", size)[0]
             self.cursor += 1
 
@@ -122,6 +148,19 @@ class BiParser:
 
         return result
 
+    def parseBinary(self, large):
+        if large:
+            size = self.byte_seq[self.cursor : self.cursor+4]
+            size = struct.unpack("<I", size)[0]
+            self.cursor += 4
+        else:
+            size = self.byte_seq[self.cursor : self.cursor+1]
+            size = struct.unpack("<B", size)[0]
+            self.cursor += 1
+
+        result = self.byte_seq[self.cursor : self.cursor + size]
+        self.cursor += size
+        return result
 
 class BiRecord:
     
@@ -130,6 +169,9 @@ class BiRecord:
 
     def getRootValue(self):
         return self.root_value
+
+    def changeRootValue(self):
+        self.root_value = root_value
 
     def encodeRecord(self):
         result = bytearray()
@@ -164,8 +206,11 @@ class BiRecord:
         elif t == dict:
             # type added inside self.encodeNList
             result += self.encodeNList(value)
+        elif t == bytearray or t == bytes:
+            # type added inside self.encodeBinary
+            result += self.encodeBinary(value)
         else:
-            raise Exception("Only int, float, bool, str, list and dict types allowed")
+            raise Exception("Only int, float, bool, str, list, dict, byte and bytearray types are allowed")
 
         return result
 
@@ -219,4 +264,18 @@ class BiRecord:
             key = self.encodeString(key);
             result += key + nlist_value
 
+        return result
+
+    def encodeBinary(self, value):
+        result = bytearray()
+        size = len(value)
+        
+        if size > 255:
+            result.append(0x17)
+            result += struct.pack("<I", size)
+        else:
+            result.append(0x07)
+            result += struct.pack("<B", size)
+        
+        result += value
         return result
