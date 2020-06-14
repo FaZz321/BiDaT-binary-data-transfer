@@ -33,7 +33,7 @@ class BiParser:
             raise Exception("[BiParser]: frist bytes not found")
         self.cursor += 1
         
-        value = self.parseValue()
+        value = self._parseValue()
         
         if self.byte_seq[self.cursor] != 0xFF:
             raise Exception("[BiParser]: last bytes not found")
@@ -42,48 +42,48 @@ class BiParser:
         result = BiRecord(value)
         return result
 
-    def parseValue(self):
+    def _parseValue(self):
         value_type = self.byte_seq[self.cursor]
         self.cursor += 1
 
         value_type
 
         if value_type == 0x01:
-            return self.parseInt()
+            return self._parseInt()
         elif value_type == 0x02:
-            return self.parseReal()
+            return self._parseReal()
         elif value_type == 0x03:
-            return self.parseBool()
+            return self._parseBool()
         elif value_type == 0x04:
-            return self.parseString()
+            return self._parseString()
         elif value_type == 0x05:
-            return self.parseList(large = False)
+            return self._parseList(large = False)
         elif value_type == 0x15:
-            return self.parseList(large = True)
+            return self._parseList(large = True)
         elif value_type == 0x06:
-            return self.parseNList(large = False)
+            return self._parseNList(large = False)
         elif value_type == 0x16:
-            return self.parseNList(large = True)
+            return self._parseNList(large = True)
         elif value_type == 0x07:
-            return self.parseBinary(large = False)
+            return self._parseBinary(large = False)
         elif value_type == 0x17:
-            return self.parseBinary(large = True)
+            return self._parseBinary(large = True)
         else:
             raise Exception("[BiParser]: wrong value type")
 
         return result
 
-    def parseInt(self):
+    def _parseInt(self):
         b = self.byte_seq[self.cursor : self.cursor + 4]
         self.cursor += 4
         return struct.unpack("<i", b)[0]
 
-    def parseReal(self):
+    def _parseReal(self):
         b = self.byte_seq[self.cursor : self.cursor + 8]
         self.cursor += 8
         return struct.unpack("<d", b)[0]
 
-    def parseBool(self):
+    def _parseBool(self):
         b = self.byte_seq[self.cursor]
         self.cursor += 1
         
@@ -96,7 +96,7 @@ class BiParser:
         
         return result
 
-    def parseString(self):
+    def _parseString(self):
         counter = 0
         byte = None
         while True:
@@ -111,7 +111,7 @@ class BiParser:
         
         return str(b, 'utf-8')
 
-    def parseList(self, large):
+    def _parseList(self, large):
         if large:
             size = self.byte_seq[self.cursor : self.cursor+4]
             size = struct.unpack("<I", size)[0]
@@ -123,11 +123,11 @@ class BiParser:
 
         result = []
         for i in range(size):
-            result.append(self.parseValue())
+            result.append(self._parseValue())
 
         return result
 
-    def parseNList(self, large):
+    def _parseNList(self, large):
         if large:
             size = self.byte_seq[self.cursor : self.cursor+4]
             size = struct.unpack("<I", size)[0]
@@ -139,16 +139,16 @@ class BiParser:
 
         result = {}
         for i in range(size):
-            key = self.parseString()
+            key = self._parseString()
             if key in result.keys():
                 raise Exception("[BiParser]: keys in named list are not unique")
             else:
-                nlist_value = self.parseValue()
+                nlist_value = self._parseValue()
             result[key] = nlist_value
 
         return result
 
-    def parseBinary(self, large):
+    def _parseBinary(self, large):
         if large:
             size = self.byte_seq[self.cursor : self.cursor+4]
             size = struct.unpack("<I", size)[0]
@@ -164,72 +164,72 @@ class BiParser:
 
 class BiRecord:
     
-    def __init__(self, root_value):
+    def __init__(self, root_value = None):
         self.root_value = root_value
 
     def getRootValue(self):
         return self.root_value
 
-    def changeRootValue(self):
+    def changeRootValue(self, root_value):
         self.root_value = root_value
 
     def encodeRecord(self):
         result = bytearray()
         
         result.append(0x00)  # starting bytes
-        value = self.encodeValue(self.root_value)
+        value = self._encodeValue(self.root_value)
         result += value
         result.append(0xFF)  # final bytes
         
         return result
 
-    def encodeValue(self, value):
+    def _encodeValue(self, value):
         result = bytearray()
 
         t = type(value)
 
         if t == int:
             result.append(0x01)
-            result += self.encodeInt(value)
+            result += self._encodeInt(value)
         elif t == float:
             result.append(0x02)
-            result += self.encodeReal(value)
+            result += self._encodeReal(value)
         elif t == bool:
             result.append(0x03)
-            result += self.encodeBool(value)
+            result += self._encodeBool(value)
         elif t == str:
             result.append(0x04)
-            result += self.encodeString(value)
+            result += self._encodeString(value)
         elif t == list:
             # type added inside self.encodeList
-            result += self.encodeList(value)
+            result += self._encodeList(value)
         elif t == dict:
             # type added inside self.encodeNList
-            result += self.encodeNList(value)
+            result += self._encodeNList(value)
         elif t == bytearray or t == bytes:
             # type added inside self.encodeBinary
-            result += self.encodeBinary(value)
+            result += self._encodeBinary(value)
         else:
             raise Exception("Only int, float, bool, str, list, dict, byte and bytearray types are allowed")
 
         return result
 
-    def encodeInt(self, value):
+    def _encodeInt(self, value):
         return struct.pack("<i", value)
 
-    def encodeReal(self, value):
+    def _encodeReal(self, value):
         return struct.pack("<d", value)
 
-    def encodeBool(self, value):
+    def _encodeBool(self, value):
         if (value == True):
             return bytearray([1])
         else:
             return bytearray([0])
 
-    def encodeString(self, value):
+    def _encodeString(self, value):
         return bytearray(value, "utf-8") + bytearray([0])
 
-    def encodeList(self, value):
+    def _encodeList(self, value):
         result = bytearray()
         size = len(value)
 
@@ -240,11 +240,11 @@ class BiRecord:
             result.append(0x05)
             result += struct.pack("<B", size)
         for i in range(size):
-            result += self.encodeValue( value[i] )
+            result += self._encodeValue( value[i] )
 
         return result
 
-    def encodeNList(self, value):
+    def _encodeNList(self, value):
         result = bytearray()
         size = len(value)
 
@@ -260,13 +260,13 @@ class BiRecord:
             key = keys[i]
             if (type(key) != str):
                 raise Exception("Only str based keys allowed")
-            nlist_value = self.encodeValue(value[key])
+            nlist_value = self._encodeValue(value[key])
             key = self.encodeString(key);
             result += key + nlist_value
 
         return result
 
-    def encodeBinary(self, value):
+    def _encodeBinary(self, value):
         result = bytearray()
         size = len(value)
         
