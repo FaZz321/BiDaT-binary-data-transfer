@@ -4,9 +4,8 @@
 // BiNode //
 ////////////
 
-BiNode::BiNode(BI_TYPE type, unsigned int binary_index) {
+BiNode::BiNode(BI_TYPE type) {
 	this->type = type;
-	this->binary_index = binary_index;  // TOFIX: proverki
 }
 
 BiNode::~BiNode() {}

@@ -6,7 +6,7 @@
 //////////////////////
 
 enum BI_TYPE {
-    BI_EMPTY,
+    BI_EMPTY,  // TOFIX: do I need that?
 	BI_INTEGER,
 	BI_REAL,
 	BI_STRING,
@@ -27,5 +27,8 @@ enum BI_ACCESS_MODE {
     BI_BUSY
 };
 
+///////////////
+// FUNCTIONS //
+///////////////
 
 #endif

@@ -6,14 +6,13 @@
 
 class BiNode {
 	private:
-		unsigned int binary_index;  // position of node in raw binary data
 		BI_TYPE type;  // child type BiNode
 
 	protected:
 		void setType(BI_TYPE newType);
 
 	public:
-		BiNode(BI_TYPE type, unsigned int binary_index = 0);
+		BiNode(BI_TYPE type);
 		virtual ~BiNode();
 
 		virtual BiNode* byIndex(unsigned int index);
