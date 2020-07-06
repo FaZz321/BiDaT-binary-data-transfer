@@ -4,6 +4,7 @@
 // dependencies:
 #include <cstring>
 #include <vector>
+#include <cmath>
 
 ////////////
 // CONSTS //
@@ -31,8 +32,8 @@ class BiNode {
         virtual ~BiNode();
 
         BI_TYPE getType();
-        virtual BiNode* operator [] (const int);
-        virtual BiNode* operator [] (const char*);
+        virtual BiNode& operator [] (const int);
+        virtual BiNode& operator [] (const char*);
 };
 
 //////////////////
@@ -60,6 +61,7 @@ class BiInteger: public BiScalar {
 
     public:
         BiInteger();
+        BiInteger(int initValue);
         ~BiInteger();
 
         int getValue();
@@ -75,6 +77,7 @@ class BiReal: public BiScalar {
 
     public:
         BiReal();
+        BiReal(double initValue);
         ~BiReal();
 
         double getValue();
@@ -90,6 +93,7 @@ class BiBool: public BiScalar {
 
     public:
         BiBool();
+        BiBool(bool initValue);
         ~BiBool();
 
         bool getValue();
@@ -117,6 +121,7 @@ class BiString: public BiComplex {
 
     public:
         BiString();
+        BiString(const char* initValue);
         ~BiString();
 
         virtual unsigned int getSize();
@@ -134,6 +139,7 @@ class BiBinary: public BiComplex {
 
     public:
         BiBinary();
+        BiBinary(const char* initValue, unsigned int size);
         virtual ~BiBinary();
 
         unsigned int getSize();
@@ -156,9 +162,6 @@ class BiAbstrList: public BiNode {
         virtual unsigned int getSize() = 0;
 };
 
-
-// TOFIX: implement further:
-
 class BiList: public BiAbstrList {
     protected:
         std::vector<BiNode*> values;
@@ -167,12 +170,31 @@ class BiList: public BiAbstrList {
         BiList();
         virtual ~BiList();
 
-        void pushBack(BiNode* new_node);
-        void pushFront(BiNode* new_node);
-        void insert(BiNode* new_node, unsigned int index);
+        void pushBack(int integerValue);
+        void pushBack(double realValue);
+        void pushBack(bool boolValue);
+        void pushBack(const char* stringValue);
+        void pushBack(const char* binaryValue, unsigned int size);
+        void pushBackNewNode(BiNode* node);
+
+        void pushFront(int integerValue);
+        void pushFront(double realValue);
+        void pushFront(bool boolValue);
+        void pushFront(const char* stringValue);
+        void pushFront(const char* binaryValue, unsigned int size);
+        void pushFrontNewNode(BiNode* node);
+
+        void insert(int integerValue, unsigned int index);
+        void insert(double integerValue, unsigned int index);
+        void insert(bool integerValue, unsigned int index);
+        void insert(const char* integerValue, unsigned int index);
+        void insert(const char* integerValue, unsigned int size, unsigned int index);
+        void insert(BiAbstrList* new_list, unsigned int index);
+        void insertNewNode(BiNode* node, unsigned int index);
+
         void destroy(unsigned int index);
 
-        virtual BiNode* operator[] (const int index);
+        virtual BiNode& operator[] (const int index);
         virtual unsigned int getSize();
 };
 
@@ -194,6 +216,8 @@ class BiHashList {
         std::vector<BiNameNodeTuple*> items;
 
     public:
+        ~BiHashList();
+
         BiNameNodeTuple* get(unsigned int index);
         BiNameNodeTuple* find(const char* name);
         void push(BiNameNodeTuple* newValue);
@@ -204,7 +228,7 @@ class BiHashList {
 
 class BiHashTable {
     private:
-        const static unsigned int table_size = 10;
+        const static unsigned int table_size = 7;
         BiHashList table[BiHashTable::table_size];
 
     protected:
@@ -227,10 +251,16 @@ class BiNamedList: public BiAbstrList {
         BiNamedList();
         virtual ~BiNamedList();
 
-        void push(const char* name, BiNode* new_node);
+        void push(const char* name, int integer_value);
+        void push(const char* name, double real_value);
+        void push(const char* name, bool bool_value);
+        void push(const char* name, const char* string_value);
+        void push(const char* name, const char* binary_value, unsigned int size);
+        void pushNewNode(const char* name, BiNode* new_node);
+
         void destroy(const char* name);
 
-        virtual BiNode* operator[] (const char* name);
+        virtual BiNode& operator[] (const char* name);
         virtual unsigned int getSize();
         const char* getName(unsigned int index);
 };

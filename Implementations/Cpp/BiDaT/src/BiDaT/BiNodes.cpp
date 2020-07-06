@@ -14,11 +14,11 @@ BI_TYPE BiNode::getType() {
     return this->type;
 }
 
-BiNode* BiNode::operator[](const int index) {
+BiNode& BiNode::operator[](const int index) {
     throw 1;  // ERROR: Out of bounds.
 }
 
-BiNode* BiNode::operator[](const char* name) {
+BiNode& BiNode::operator[](const char* name) {
     throw 1;  // ERROR: Out of bounds.
 }
 
@@ -46,6 +46,11 @@ bool BiScalar::_isAllocated() {
 
 BiInteger::BiInteger(): BiScalar(BI_INTEGER) {
     this->value = 0;
+}
+
+BiInteger::BiInteger(int initValue): BiScalar(BI_INTEGER) {
+    this->_setAsAllocated();
+    this->value = new int(initValue);
 }
 
 BiInteger::~BiInteger() {
@@ -80,6 +85,11 @@ BiReal::BiReal(): BiScalar(BI_REAL) {
     this->value = 0;
 }
 
+BiReal::BiReal(double initValue): BiScalar(BI_REAL) {
+    this->_setAsAllocated();
+    this->value = new double(initValue);
+}
+
 BiReal::~BiReal() {
     if (this->_isAllocated())
         delete this->value;
@@ -110,6 +120,11 @@ void BiReal::setValue(double newValue) {
 
 BiBool::BiBool(): BiScalar(BI_BOOL) {
     this->value = 0;
+}
+
+BiBool::BiBool(bool initValue): BiScalar(BI_BOOL) {
+    this->_setAsAllocated();
+    this->value = new bool(initValue);
 }
 
 BiBool::~BiBool() {
@@ -152,6 +167,13 @@ BiString::BiString(): BiComplex(BI_STRING) {
     this->value = 0;
 }
 
+BiString::BiString(const char* initValue): BiComplex(BI_STRING) {
+    this->_setAsAllocated();
+    size_t size = strlen(initValue) + 1;
+    this->value = new char[size];
+    memcpy(this->value, initValue, size);
+}
+
 BiString::~BiString() {
     if (this->_isAllocated())
         delete this->value;
@@ -188,6 +210,14 @@ BiBinary::BiBinary(): BiComplex(BI_BINARY) {
     this->size = 0;
     this->value = 0;
 }
+
+BiBinary::BiBinary(const char* initValue, unsigned int size): BiComplex(BI_BINARY) {
+    this->_setAsAllocated();
+    this->value = new char[size];
+    this->size = size;
+    memcpy(this->value, initValue, size);
+}
+
 
 BiBinary::~BiBinary() {
     if (this->_isAllocated())
@@ -243,21 +273,83 @@ void BiAbstrList::_setReference(void* value) {
 BiList::BiList(): BiAbstrList(BI_LIST) {}
 
 BiList::~BiList() {
-    unsigned int size = this->values.size();
-    for (unsigned int i = 0; i < size; i++) {
+    size_t size = this->values.size();
+    for (unsigned int i = 0; i < size; i++)
         delete this->values[i];
-    }
 }
 
-void BiList::pushBack(BiNode* new_node) {
+// BiList::pushBack
+void BiList::pushBack(int integer_value) {
+    BiInteger* new_node = new BiInteger(integer_value);
+    this->values.push_back(new_node);
+}
+void BiList::pushBack(double real_value) {
+    BiReal* new_node = new BiReal(real_value);
+    this->values.push_back(new_node);
+}
+void BiList::pushBack(bool bool_value) {
+    BiBool* new_node = new BiBool(bool_value);
+    this->values.push_back(new_node);
+}
+void BiList::pushBack(const char* string_value) {
+    BiString* new_node = new BiString(string_value);
+    this->values.push_back(new_node);
+}
+void BiList::pushBack(const char* binary_value, unsigned int size) {
+    BiBinary* new_node = new BiBinary(binary_value, size);
+    this->values.push_back(new_node);
+}
+void BiList::pushBackNewNode(BiNode* new_node) {
     this->values.push_back(new_node);
 }
 
-void BiList::pushFront(BiNode* new_node) {
+// BiList::pushFront
+void BiList::pushFront(int integerValue) {
+    BiInteger* new_node = new BiInteger(integerValue);
+    this->values.insert(this->values.begin(), new_node);
+}
+void BiList::pushFront(double realValue) {
+    BiReal* new_node = new BiReal(realValue);
+    this->values.insert(this->values.begin(), new_node);
+}
+void BiList::pushFront(bool boolValue) {
+    BiBool* new_node = new BiBool(boolValue);
+    this->values.insert(this->values.begin(), new_node);
+}
+void BiList::pushFront(const char* stringValue) {
+    BiString* new_node = new BiString(stringValue);
+    this->values.insert(this->values.begin(), new_node);
+}
+void BiList::pushFront(const char* binaryValue, unsigned int size) {
+    BiBinary* new_node = new BiBinary(binaryValue, size);
+    this->values.insert(this->values.begin(), new_node);
+}
+void BiList::pushFrontNewNode(BiNode* new_node) {
     this->values.insert(this->values.begin(), new_node);
 }
 
-void BiList::insert(BiNode* new_node, unsigned int index) {
+// BiList::insert
+void BiList::insert(int integerValue, unsigned int index) {
+    BiInteger* new_node = new BiInteger(integerValue);
+    this->values.insert(this->values.begin()+index, new_node);
+}
+void BiList::insert(double realValue, unsigned int index) {
+    BiReal* new_node = new BiReal(realValue);
+    this->values.insert(this->values.begin()+index, new_node);
+}
+void BiList::insert(bool boolValue, unsigned int index) {
+    BiBool* new_node = new BiBool(boolValue);
+    this->values.insert(this->values.begin()+index, new_node);
+}
+void BiList::insert(const char* stringValue, unsigned int index) {
+    BiString* new_node = new BiString(stringValue);
+    this->values.insert(this->values.begin()+index, new_node);
+}
+void BiList::insert(const char* binaryValue, unsigned int size, unsigned int index) {
+    BiBinary* new_node = new BiBinary(binaryValue, size);
+    this->values.insert(this->values.begin()+index, new_node);
+}
+void BiList::insertNewNode(BiNode* new_node, unsigned int index) {
     this->values.insert(this->values.begin()+index, new_node);
 }
 
@@ -265,8 +357,8 @@ void BiList::destroy(unsigned int index) {
     this->values.erase(this->values.begin()+index);
 }
 
-BiNode* BiList::operator[] (const int index) {
-    return this->values.at(index);
+BiNode& BiList::operator[] (const int index) {
+    return *this->values.at(index);
 }
 
 unsigned int BiList::getSize() {
@@ -300,6 +392,12 @@ const char* BiNameNodeTuple::getName() {
 ////////////////
 // BiHashList //
 ////////////////
+
+BiHashList::~BiHashList() {
+    size_t size = this->items.size();
+    for (unsigned int i = 0; i < size; i++)
+        delete this->items[i];
+}
 
 BiNameNodeTuple* BiHashList::find(const char* name) {
     unsigned int size = this->items.size();
@@ -364,6 +462,7 @@ unsigned int BiHashTable::_calcNameHash(const char* name) {
     unsigned int result = 0;
     for (unsigned int i = 0; i < name_size; i++)
         result += name[i];
+    result = abs(result);
     result %= this->table_size;
 
     return result;
@@ -381,9 +480,7 @@ BiNode* BiHashTable::find(const char* name) {
 
 void BiHashTable::push(const char* name, BiNode* new_node) {
     unsigned int hash = this->_calcNameHash(name);
-
-    BiNameNodeTuple* newTuple = new BiNameNodeTuple(name, new_node);
-    this->table[hash].push(newTuple);
+    this->table[hash].push(new BiNameNodeTuple(name, new_node));
 }
 
 void BiHashTable::destroy(const char* name) {
@@ -426,7 +523,29 @@ BiNamedList::BiNamedList(): BiAbstrList(BI_NAMED_LIST) {}
 
 BiNamedList::~BiNamedList() {}
 
-void BiNamedList::push(const char* name, BiNode* new_node) {
+// BiNamedList::push
+void BiNamedList::push(const char* name, int integer_value) {
+    BiInteger* new_node = new BiInteger(integer_value);
+    this->hash_table.push(name, new_node);
+}
+void BiNamedList::push(const char* name, double real_value) {
+    BiReal* new_node = new BiReal(real_value);
+    this->hash_table.push(name, new_node);
+}
+void BiNamedList::push(const char* name, bool bool_value) {
+    BiBool* new_node = new BiBool(bool_value);
+    this->hash_table.push(name, new_node);
+}
+void BiNamedList::push(const char* name, const char* string_value) {
+    BiString* new_node = new BiString(string_value);
+    this->hash_table.push(name, new_node);
+}
+void BiNamedList::push(const char* name, const char* binary_value, unsigned int size) {
+    BiBinary* new_node = new BiBinary(binary_value, size);
+    this->hash_table.push(name, new_node);
+}
+
+void BiNamedList::pushNewNode(const char* name, BiNode* new_node) {
     this->hash_table.push(name, new_node);
 }
 
@@ -434,8 +553,8 @@ void BiNamedList::destroy(const char* name) {
     this->hash_table.destroy(name);
 }
 
-BiNode* BiNamedList::operator[] (const char* name) {
-    return this->hash_table.find(name);
+BiNode& BiNamedList::operator[] (const char* name) {
+    return *this->hash_table.find(name);
 }
 
 unsigned int BiNamedList::getSize() {
