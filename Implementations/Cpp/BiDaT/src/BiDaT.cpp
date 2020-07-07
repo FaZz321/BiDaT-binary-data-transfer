@@ -12,38 +12,38 @@ using namespace std;
 ////////////////
 
 void printNode(BiNode* node) {
-    BI_TYPE type = node->getType();
+    BI_NODE_TYPE type = node->getType();
     switch(type) {
-        case BI_INTEGER: {
+        case BI_NODE_TYPE_INT: {
             BiInteger* n = (BiInteger*) node;
             std::cout << "Integer: " << n->getValue() << std::endl;
             break;
-        } case BI_REAL: {
+        } case BI_NODE_TYPE_REAL: {
             BiReal* n = (BiReal*) node;
             std::cout << "Real: " << n->getValue() << std::endl;
             break;
-        } case BI_BOOL: {
+        } case BI_NODE_TYPE_BOOL: {
             BiBool* n = (BiBool*) node;
             std::cout << "Bool: " << n->getValue() << std::endl;
             break;
-        } case BI_STRING: {
+        } case BI_NODE_TYPE_STR: {
             BiString* n = (BiString*) node;
             size_t size = n->getSize();
-            std::cout << "String (size = " << size << " characters):" << n->getValue() << std::endl;
+            std::cout << "String (size = " << size << " characters): " << n->getValue() << std::endl;
             break;
-        } case BI_BINARY: {
+        } case BI_NODE_TYPE_BINARY: {
             BiBinary* n = (BiBinary*) node;
             size_t size = n->getSize();
-            const char* bytes = n->getValue();
-            std::cout << "Binary (size = " << size << " bytes):";
+            const BI_BYTE_T* bytes = n->getValue();
+            std::cout << "Binary (size = " << size << " bytes): ";
             for(unsigned int i = 0; i < size; i++)
-                std::cout << bytes[i] << ", ";
+                std::cout << (int)bytes[i] << ", ";
             std::cout << std::endl;
             break;
-        } case BI_LIST: {
+        } case BI_NODE_TYPE_LIST: {
             BiList* n = (BiList*) node;
             size_t size = n->getSize();
-            std::cout << "LIST (" << size << " items):" << std::endl;
+            std::cout << "LIST (" << size << " items): " << std::endl;
             for (unsigned int i = 0; i < size; i++) {
                 std::cout << "["<< i << "] ";
                 BiNode& subNode = (*n)[i];
@@ -51,10 +51,10 @@ void printNode(BiNode* node) {
             }
             std::cout << "END OF LIST" << std::endl;
             break;
-        } case BI_NAMED_LIST: {
+        } case BI_NODE_TYPE_NAMED_LIST: {
             BiNamedList* n = (BiNamedList*) node;
             size_t size = n->getSize();
-            std::cout << "NAMED LIST (" << size << " items):" << std::endl;
+            std::cout << "NAMED LIST (" << size << " items): " << std::endl;
             const char* name;
             for (unsigned int i = 0; i < size; i++) {
                 name = n->getName(i);
@@ -73,7 +73,12 @@ void nodesTest() {
     BiReal n_real(3.14);
     BiBool n_bool(true);
     BiString n_string("hello world!");
-    BiBinary n_binary("0123456789", 10);
+    unsigned char* bytes = new unsigned char[10];
+    for (int i = 0; i < 10; i++) {
+        bytes[i] = i;
+    }
+    BiBinary n_binary(bytes, 10);
+    delete bytes;
 
     BiList indexed_list = BiList();
     indexed_list.pushBack(1);
@@ -98,7 +103,12 @@ void nodesTest() {
     cur_list = (BiList*) &nested_list[1];
     cur_list->pushBack("string");
     cur_list->pushBack(true);
-    cur_list->pushBack("binary crap", 11);
+    bytes = new unsigned char[11];
+    for (int i = 0; i < 11; i++) {
+        bytes[i] = i;
+    }
+    cur_list->pushBack(bytes, 11);
+    delete bytes;
 
     cur_list = (BiList*) &nested_list[2];
 
@@ -163,7 +173,12 @@ void memoryTest() {
     // binary (success):
     BiBinary* binary_node = new BiBinary();
     delete binary_node;
-    binary_node = new BiBinary("binary_data", 11);
+    BI_BYTE_T* bytes = new BI_BYTE_T[11];
+    for (int i = 0; i < 11; i++) {
+        bytes[i] = i;
+    }
+    binary_node = new BiBinary(bytes, 11);
+    delete bytes;
     delete binary_node;
 
     // indexed list 1 (success):
@@ -190,7 +205,13 @@ void memoryTest() {
     BiNamedList* named_list = new BiNamedList();
     named_list->push("VAR1", 1);
     named_list->push("VAR2", "string");
-    named_list->push("VAR3", "binary", 6);
+    bytes = new BI_BYTE_T[6];
+    for (int i = 0; i < 6; i++) {
+        bytes[i] = i;
+    }
+    binary_node = new BiBinary(bytes, 11);
+    named_list->push("VAR3", bytes, 6);
+    delete bytes;
     delete named_list;
 
     // named list 2:
@@ -216,55 +237,35 @@ void memoryTest() {
 }
 
 void readTest() {
-    // TOFIX: test reading from files
+    ifstream test_file;
+    test_file.open("test_cases/NestedArray4.bdt", ios::binary | ios::ate);
 
-    /*
-        ifstream test_file;
-        test_file.open("test_cases/SingleString.bdt", ios::binary | ios::ate);
+    streampos size = test_file.tellg();
+    char* memblock = new char[size];
+    test_file.seekg(0, ios::beg);
 
-        streampos size = test_file.tellg();
-        char* memblock = new char[size];
-        test_file.seekg(0, ios::beg);
+    test_file.read(memblock, size);
+    test_file.close();
 
-        test_file.read(memblock, size);
+    BiRecord rec;
+    BiParser parser = BiParser((BI_BYTE_T*)memblock);
+    parser.parseMessage(rec);
 
-        test_file.close();
+    printNode(rec.getRoot());
+    delete memblock;
+}
 
-        BiRecord record((unsigned char*) memblock);
-        record.moderateMode();
-
-        record.get_root();
-
-        delete[] memblock;
-    */
-
-    /*
-    void readTest() {
-        // read message from file:
-        ifstream test_file;
-        test_file.open("test_cases/SingleReal.bdt", ios::binary | ios::ate);
-
-        streampos size = test_file.tellg();
-        char* memblock = new char[size];
-        test_file.seekg(0, ios::beg);
-
-        test_file.read(memblock, size);
-
-        test_file.close();
-
-        // do stuff:
-        BiRecord record(memblock);
-        record.moderateMode();
-    }
-    */
+void writeTest() {
+    // TOFIX: implement
 }
 
 
 int main() {
     // nodesTest(); success!
     // speedTest(); success!
-    memoryTest();
-    // readTest();
+    // memoryTest(); success!
+    // readTest();  success!
+    writeTest();
 
 	return 0;
 }

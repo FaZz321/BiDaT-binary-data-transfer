@@ -17,7 +17,7 @@ def read_from_file(file_name):
 # INIT #
 ########
 
-file_to_read = "NestedArray4.bdt"
+file_to_read = "SingleInteger.bdt"
 
 
 ###########
