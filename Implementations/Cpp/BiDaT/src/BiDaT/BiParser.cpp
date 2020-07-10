@@ -11,14 +11,14 @@ BiParser::BiParser(BI_BYTE_T* binary_data) {
 
 void BiParser::parseMessage(BiRecord &dest) {
     if (this->_binary_data[this->_cursor] != 0x00)
-        throw 1;  // ERROR: parsing error. Not a BiDaT message
+        throw BI_ERROR_CANT_PARSE;  // Not a BiDaT message
     this->_cursor++;
 
     BiNode* result = this->_parseValue();
 
     if (this->_binary_data[this->_cursor] != 0xFF) {
         delete result;
-        throw 1;  // ERROR: parsing error. Not a BiDaT message
+        throw BI_ERROR_CANT_PARSE;  // Not a BiDaT message
     }
 
     dest.setRoot(result);
@@ -50,7 +50,7 @@ BiNode* BiParser::_parseValue() {
         case 0x17:
             return this->_parseBinary(true);
         default:
-            throw 1;  // ERROR: parse error. wrong value type
+            throw BI_ERROR_CANT_PARSE;  // Wrong value type
     }
 }
 
@@ -76,7 +76,7 @@ BiNode* BiParser::_parseBool() {
     // 1 byte bool
     BI_BOOL_T* value = (BI_BOOL_T*) (this->_binary_data + this->_cursor);
     if (!(*value == 0x00 || *value == 0x01))
-        throw 1;  // parsing error. abnormal bool value
+        throw BI_ERROR_CANT_PARSE;  // Abnormal boolean value
     BiBool* result = new BiBool();
     result->_setReference(value);
     this->_cursor += 1;

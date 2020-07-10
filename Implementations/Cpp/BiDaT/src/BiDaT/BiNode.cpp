@@ -15,11 +15,11 @@ BI_NODE_TYPE BiNode::getType() {
 }
 
 BiNode& BiNode::operator[](const BI_UINT32_T index) {
-    throw 1;  // ERROR: Out of bounds.
+    throw BI_ERROR_OUT_OF_RANGE;
 }
 
 BiNode& BiNode::operator[](const BI_CHAR_T* name) {
-    throw 1;  // ERROR: Out of bounds.
+    throw BI_ERROR_OUT_OF_RANGE;
 }
 
 //////////////
@@ -64,7 +64,7 @@ void BiInteger::_setReference(void* value) {
 
 BI_INT32_T BiInteger::getValue() {
     if (!this->value)
-        throw 1;  // ERROR: value is not defined;
+        throw BI_ERROR_NOT_INITIALIZED;
     return *this->value;
 }
 
@@ -101,7 +101,7 @@ void BiReal::_setReference(void* value) {
 
 BI_FLOAT64_T BiReal::getValue() {
     if (!this->value)
-        throw 1;  // ERROR: value is not defined;
+        throw BI_ERROR_NOT_INITIALIZED;
     return *this->value;
 }
 
@@ -138,7 +138,7 @@ void BiBool::_setReference(void* value) {
 
 BI_BOOL_T BiBool::getValue() {
     if (!this->value)
-        throw 1;  // ERROR: value is not defined;
+        throw BI_ERROR_NOT_INITIALIZED;
     return *this->value;
 }
 
@@ -170,7 +170,7 @@ BiString::BiString(): BiComplex(BI_NODE_TYPE_STR) {
 BiString::BiString(const BI_CHAR_T* initValue): BiComplex(BI_NODE_TYPE_STR) {
     this->_setAsAllocated();
     unsigned int size = strlen(initValue) + 1;
-    this->value = new BI_CHAR_T(size);
+    this->value = new BI_CHAR_T[size];
     memcpy(this->value, initValue, size);
 }
 
@@ -267,7 +267,7 @@ BiAbstrList::BiAbstrList(BI_NODE_TYPE type): BiNode(type) {}
 BiAbstrList::~BiAbstrList() {}
 
 void BiAbstrList::_setReference(void* value) {
-    throw 1;  // ERROR: internal error. List cannot be a reference.
+    throw BI_ERROR_INTERNAL;  // List cannot be a reference
 }
 
 ////////////
@@ -362,7 +362,12 @@ void BiList::destroy(const BI_UINT32_T index) {
 }
 
 BiNode& BiList::operator[] (const BI_UINT32_T index) {
-    return *this->values.at(index);
+    size_t size = this->values.size();
+
+    if (index >= size)
+        throw BI_ERROR_OUT_OF_RANGE;
+
+    return *this->values[index];
 }
 
 BI_UINT32_T BiList::getSize() {
@@ -375,7 +380,7 @@ BI_UINT32_T BiList::getSize() {
 
 BiNameNodeTuple::BiNameNodeTuple(const BI_CHAR_T* name, BiNode* node) {
     if (!node || !name)
-        throw 1;  // ERROR: internal error. node is not set
+        throw BI_ERROR_INTERNAL;  // Node is not set
     this->name = name;
     this->node = node;
 }
@@ -429,7 +434,7 @@ void BiHashList::destroy(const BI_CHAR_T* name) {
         }
     }
 
-    throw 1;  // ERROR: out of bounds error. No value with such a name
+    throw BI_ERROR_OUT_OF_RANGE;  // No value with such a name
 }
 
 void BiHashList::push(BiNameNodeTuple* newValue) {
@@ -476,7 +481,7 @@ BiNode* BiHashTable::find(const BI_CHAR_T* name) {
 
     BiNameNodeTuple* tuple = this->table[hash].find(name);
     if (!tuple)
-        throw 1;  // ERROR: out of bounds error. There is no value with such name
+        throw BI_ERROR_OUT_OF_RANGE;  // There is no value with such name
 
     return tuple->getNode();
 }
@@ -518,7 +523,7 @@ const BI_CHAR_T* BiHashTable::getName(BI_UINT32_T index) {
         return tuple->getName();
     }
 
-    throw 1;  // ERROR: out of bounds. index is refering to non existent key
+    throw BI_ERROR_OUT_OF_RANGE;  // Index referring to non existent key
 }
 
 /////////////////
