@@ -6,12 +6,12 @@
 #
 #   decoding:
 #     1. Create new instance of BiParser, using byte sequence as an argument
-#     2. use BiParser.parseRecord() to parse byte sequence to BiRecord
+#     2. use BiParser.parse() to parse byte sequence to BiRecord
 #     3. use BiRecord.getRootValue() to get reference (!) to python-type values contained in BiRecord instance
 #
 #   encoding:
 #     1. Create a new instance of BiRecord using root value (python-type data: int, float, bool, str, list, dict, byte, bytearray) as an argument
-#     2. use BiRecord.encodeRecord() to create BiDaT byte sequence
+#     2. use BiRecord.encode() to create BiDaT byte sequence
 #     Note: you can change root value by using BiRecord.changeRootValue() OR you can change it by using reference to root value.
 #
 #   Not threadsafe. (good thing to add in the future)
@@ -28,7 +28,7 @@ class BiParser:
         self.byte_seq = new_byte_seq
         self.cursor = 0
 
-    def parseRecord(self):
+    def parse(self):
         if self.byte_seq[self.cursor] != 0x00:
             raise Exception("[BiParser]: frist bytes not found")
         self.cursor += 1
@@ -173,7 +173,7 @@ class BiRecord:
     def changeRootValue(self, root_value):
         self.root_value = root_value
 
-    def encodeRecord(self):
+    def encode(self):
         result = bytearray()
         
         result.append(0x00)  # starting bytes

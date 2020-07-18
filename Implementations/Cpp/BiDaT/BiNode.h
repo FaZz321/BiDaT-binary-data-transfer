@@ -6,6 +6,8 @@
 #include <vector>
 #include <cmath>
 
+
+
 ////////////
 // CONSTS //
 ////////////
@@ -38,6 +40,8 @@ typedef unsigned int BI_UINT32_T;
 typedef double BI_FLOAT64_T;
 typedef bool BI_BOOL_T;
 
+
+
 ///////////
 // NODES //
 ///////////
@@ -57,6 +61,8 @@ class BiNode {
 
         virtual void _setReference(void* value) = 0;
 };
+
+
 
 //////////////////
 // Scalar types //
@@ -119,6 +125,8 @@ class BiBool: public BiScalar {
         virtual void _setReference(void* value);
 };
 
+
+
 ///////////////
 // BiComplex //
 ///////////////
@@ -164,6 +172,8 @@ class BiBinary: public BiComplex {
         virtual void _setReference(void* value);
         void _setSize(BI_UINT32_T newSize);  // used only when setting a reference;
 };
+
+
 
 /////////////
 // BiLists //

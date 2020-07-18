@@ -38,12 +38,12 @@ class BiRecord {
         BiRecord(BiNode* root);
         ~BiRecord();
 
+        void encode();
+
         void setRoot(BiNode* node);
         BiNode* getRoot();
         const unsigned char* getMessage();
         unsigned int getMessageSize();
-
-        void encodeMessage();
 };
 
 #endif

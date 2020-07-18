@@ -41,7 +41,7 @@ BiRecord::~BiRecord() {
     }
 }
 
-void BiRecord::encodeMessage() {
+void BiRecord::encode() {
     BiRecordChunk* leftBracket = new BiRecordChunk(1);
     *leftBracket->data = 0x00;
     this->chunks.push_back(leftBracket);
@@ -165,12 +165,12 @@ void BiRecord::_encodeNamedList(BiNamedList* node) {
     BI_UINT32_T size = node->getSize();
     if (size > 255) {
         BiRecordChunk* result = new BiRecordChunk(5);
-        result->data[0] = 0x15;
+        result->data[0] = 0x16;
         *((BI_UINT32_T*) (result->data+1)) = size;
         this->chunks.push_back(result);
     } else {
         BiRecordChunk* result = new BiRecordChunk(2);
-        result->data[0] = 0x05;
+        result->data[0] = 0x06;
         *((BI_UINT8_T*) (result->data+1)) = size;
         this->chunks.push_back(result);
     }
@@ -190,6 +190,16 @@ void BiRecord::_encodeNamedList(BiNamedList* node) {
 void BiRecord::setRoot(BiNode* newRoot) {
     if (this->root)
         delete this->root;
+
+    if (this->message)
+        delete this->message;
+    this->message = 0;
+
+    size_t size = this->chunks.size();
+    for (unsigned int i = 0; i < size; i++) {
+        delete this->chunks[i];
+    }
+    this->chunks.clear();
 
     this->root = newRoot;
 }

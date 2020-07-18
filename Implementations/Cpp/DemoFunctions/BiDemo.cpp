@@ -299,7 +299,7 @@ void readTest(const char* file_name) {
 
     BiRecord rec;
     BiParser parser = BiParser((BI_BYTE_T*)memblock);
-    parser.parseMessage(rec);
+    parser.parse(rec);
 
     printNode(rec.getRoot());
     delete memblock;
@@ -316,7 +316,7 @@ void writeTest(const char* file_name) {
 
     root->setValue(15);
 
-    rec.encodeMessage();
+    rec.encode();
     printNode(rec.getRoot());
 
     test_file.write((const char*) rec.getMessage(), rec.getMessageSize());

@@ -29,7 +29,7 @@ print("Reading started!")
 binary_data = read_from_file(file_to_read)
 parser = BiParser(binary_data)
 
-rec = parser.parseRecord()
+rec = parser.parse()
 value = rec.getRootValue()
 
 print("Reading completed!")

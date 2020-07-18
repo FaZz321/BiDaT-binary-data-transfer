@@ -1,15 +1,25 @@
 #include "BiParser.h"
 
+
+
 //////////////
 // BiParser //
 //////////////
+
+BiParser::BiParser() {
+    this->_cursor = 0;
+    this->_binary_data = 0;
+}
 
 BiParser::BiParser(BI_BYTE_T* binary_data) {
     this->_cursor = 0;
     this->_binary_data = binary_data;
 }
 
-void BiParser::parseMessage(BiRecord &dest) {
+void BiParser::parse(BiRecord &dest) {
+    if (!this->_binary_data)
+        throw BI_ERROR_CANT_PARSE;  // No data
+
     if (this->_binary_data[this->_cursor] != 0x00)
         throw BI_ERROR_CANT_PARSE;  // Not a BiDaT message
     this->_cursor++;
@@ -73,7 +83,7 @@ BiNode* BiParser::_parseReal() {
 }
 
 BiNode* BiParser::_parseBool() {
-    // 1 byte bool
+    // 1 byte boolean
     BI_BOOL_T* value = (BI_BOOL_T*) (this->_binary_data + this->_cursor);
     if (!(*value == 0x00 || *value == 0x01))
         throw BI_ERROR_CANT_PARSE;  // Abnormal boolean value
@@ -150,4 +160,12 @@ BiNode* BiParser::_parseBinary(bool large) {
     this->_cursor += size;
 
     return result;
+}
+
+void BiParser::setBinaryData(BI_BYTE_T* binary_data) {
+    this->_binary_data = binary_data;
+}
+
+const BI_BYTE_T* BiParser::getBinaryData() {
+    return this->_binary_data;
 }

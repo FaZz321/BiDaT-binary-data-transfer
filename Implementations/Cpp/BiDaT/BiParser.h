@@ -21,9 +21,13 @@ class BiParser {
         BiNode* _parseBinary(bool large);
 
     public:
-        BiParser (BI_BYTE_T* binary_data);
+        BiParser();
+        BiParser(BI_BYTE_T* binary_data);
 
-        void parseMessage(BiRecord &dest);
+        void parse(BiRecord &dest);
+
+        void setBinaryData(BI_BYTE_T* binary_data);
+        const BI_BYTE_T* getBinaryData();
 };
 
 #endif

@@ -1,5 +1,7 @@
 #include "BiNode.h"
 
+
+
 ////////////
 // BiNode //
 ////////////
@@ -22,6 +24,8 @@ BiNode& BiNode::operator[](const BI_CHAR_T* name) {
     throw BI_ERROR_OUT_OF_RANGE;
 }
 
+
+
 //////////////
 // BiScalar //
 //////////////
@@ -39,6 +43,8 @@ void BiScalar::_setAsAllocated() {
 bool BiScalar::_isAllocated() {
     return this->_allocated;
 }
+
+
 
 ///////////////
 // BiInteger //
@@ -77,6 +83,8 @@ void BiInteger::setValue(BI_INT32_T newValue) {
     this->value = new BI_INT32_T(newValue);
 }
 
+
+
 ////////////
 // BiReal //
 ////////////
@@ -113,6 +121,8 @@ void BiReal::setValue(BI_FLOAT64_T newValue) {
 
     this->value = new BI_FLOAT64_T(newValue);
 }
+
+
 
 ////////////
 // BiBool //
@@ -151,6 +161,8 @@ void BiBool::setValue(BI_BOOL_T newValue) {
     this->value = new BI_BOOL_T(newValue);
 }
 
+
+
 ///////////////
 // BiComplex //
 ///////////////
@@ -158,6 +170,8 @@ void BiBool::setValue(BI_BOOL_T newValue) {
 BiComplex::BiComplex(BI_NODE_TYPE type): BiScalar(type) {}
 
 BiComplex::~BiComplex() {}
+
+
 
 //////////////
 // BiString //
@@ -201,6 +215,8 @@ void BiString::setValue(const BI_CHAR_T* newValue) {
     this->value = new BI_CHAR_T[size];
     memcpy(this->value, newValue, size);
 }
+
+
 
 //////////////
 // BiBinary //
@@ -258,6 +274,8 @@ void BiBinary::setValue(const BI_BYTE_T* newValue, BI_UINT32_T size) {
     memcpy(this->value, newValue, size);
 }
 
+
+
 /////////////////
 // BiAbstrList //
 /////////////////
@@ -269,6 +287,8 @@ BiAbstrList::~BiAbstrList() {}
 void BiAbstrList::_setReference(void* value) {
     throw BI_ERROR_INTERNAL;  // List cannot be a reference
 }
+
+
 
 ////////////
 // BiList //
@@ -374,6 +394,8 @@ BI_UINT32_T BiList::getSize() {
     return this->values.size();
 }
 
+
+
 /////////////////////
 // BiNameNodeTuple //
 /////////////////////
@@ -397,6 +419,8 @@ BiNode* BiNameNodeTuple::getNode() {
 const BI_CHAR_T* BiNameNodeTuple::getName() {
     return this->name;
 }
+
+
 
 ////////////////
 // BiHashList //
@@ -460,6 +484,8 @@ unsigned int BiHashList::getSize() {
 BiNameNodeTuple* BiHashList::get(unsigned int index) {
     return this->items[index];
 }
+
+
 
 /////////////////
 // BiHashTable //
@@ -525,6 +551,8 @@ const BI_CHAR_T* BiHashTable::getName(BI_UINT32_T index) {
 
     throw BI_ERROR_OUT_OF_RANGE;  // Index referring to non existent key
 }
+
+
 
 /////////////////
 // BiNamedList //
